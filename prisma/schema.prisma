@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id             String   @id @default(cuid())
+  username       String   @unique
+  passwordHash   String
+  isBot          Boolean  @default(false)
+  
+  // Resources
+  cash           Int      @default(5000)
+  bank           Int      @default(0)
+  turns          Int      @default(100)
+  
+  // Units
+  operatives     Int      @default(0)
+  soldiers       Int      @default(0)
+  
+  // Narcotics
+  alcohol        Int      @default(0)
+  weed           Int      @default(0)
+  coke           Int      @default(0)
+  
+  // Weapons
+  glocks         Int      @default(0)
+  shotguns       Int      @default(0)
+  uzis           Int      @default(0)
+  ak47s          Int      @default(0)
+  
+  // Vehicles
+  chryslers      Int      @default(0)
+  limos          Int      @default(0)
+  
+  // Planes
+  gulfstreams    Int      @default(0)
+  boeings        Int      @default(0)
+  
+  // Game state
+  city           String   @default("New York")
+  familyId       String?
+  
+  // Protection
+  protectedUntil DateTime?
+  
+  // Maxing tracking
+  lastMaxCheck   DateTime @default(now())
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  family         Family?  @relation(fields: [familyId], references: [id])
+  familyBossOf   Family?  @relation("FamilyBoss")
+  attacksInitiated Attack[] @relation("Attacker")
+  attacksReceived  Attack[] @relation("Defender")
+  sessions         Session[]
+}
+
+model Family {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  bossId      String   @unique
+  city        String   @default("New York")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  boss        Player   @relation("FamilyBoss", fields: [bossId], references: [id])
+  members     Player[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  playerId  String
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model Attack {
+  id          String   @id @default(cuid())
+  attackerId  String
+  defenderId  String
+  type        String   // "raid", "sabotage", "driveby"
+  success     Boolean
+  
+  // Results
+  cashStolen  Int      @default(0)
+  opsKilled   Int      @default(0)
+  soldiersKilled Int   @default(0)
+  weaponsStolen Int    @default(0)
+  drugsStolen Int      @default(0)
+  carsStolen  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  
+  attacker    Player   @relation("Attacker", fields: [attackerId], references: [id])
+  defender    Player   @relation("Defender", fields: [defenderId], references: [id])
+}
