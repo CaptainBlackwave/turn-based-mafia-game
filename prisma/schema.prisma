@@ -22,24 +22,17 @@ model Player {
   operatives     Int      @default(0)
   soldiers       Int      @default(0)
   
-  // Narcotics
-  alcohol        Int      @default(0)
-  weed           Int      @default(0)
-  coke           Int      @default(0)
+  // Supplies (replaces narcotics - now just food)
+  food           Int      @default(0)
   
-  // Weapons
-  glocks         Int      @default(0)
-  shotguns       Int      @default(0)
-  uzis           Int      @default(0)
-  ak47s          Int      @default(0)
+  // Weapons (consolidated to 1 type)
+  weapons        Int      @default(0)
   
-  // Vehicles
-  chryslers      Int      @default(0)
-  limos          Int      @default(0)
+  // Vehicles (consolidated to 1 type)
+  cars           Int      @default(0)
   
-  // Planes
-  gulfstreams    Int      @default(0)
-  boeings        Int      @default(0)
+  // Planes (consolidated to 1 type)
+  planes         Int      @default(0)
   
   // Game state
   city           String   @default("New York")
@@ -94,7 +87,7 @@ model Attack {
   opsKilled   Int      @default(0)
   soldiersKilled Int   @default(0)
   weaponsStolen Int    @default(0)
-  drugsStolen Int      @default(0)
+  foodStolen  Int      @default(0)
   carsStolen  Int      @default(0)
   
   createdAt   DateTime @default(now())

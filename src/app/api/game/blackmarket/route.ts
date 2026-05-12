@@ -16,31 +16,17 @@ async function getSession() {
 }
 
 const PRICES: Record<string, { buy: number; sell: number }> = {
-  alcohol: { buy: 50, sell: 25 },
-  weed: { buy: 100, sell: 50 },
-  coke: { buy: 200, sell: 100 },
-  glock: { buy: 400, sell: 200 },
-  shotgun: { buy: 800, sell: 400 },
-  uzi: { buy: 2000, sell: 1000 },
-  ak47: { buy: 4000, sell: 2000 },
-  chrysler: { buy: 8000, sell: 4000 },
-  limo: { buy: 40000, sell: 20000 },
-  gulfstream: { buy: 40000, sell: 20000 },
-  boeing: { buy: 250000, sell: 125000 },
+  food: { buy: 50, sell: 25 },
+  weapon: { buy: 1000, sell: 500 },
+  car: { buy: 20000, sell: 10000 },
+  plane: { buy: 100000, sell: 50000 },
 };
 
 const ITEM_FIELD_MAP: Record<string, string> = {
-  alcohol: 'alcohol',
-  weed: 'weed',
-  coke: 'coke',
-  glock: 'glocks',
-  shotgun: 'shotguns',
-  uzi: 'uzis',
-  ak47: 'ak47s',
-  chrysler: 'chryslers',
-  limo: 'limos',
-  gulfstream: 'gulfstreams',
-  boeing: 'boeings',
+  food: 'food',
+  weapon: 'weapons',
+  car: 'cars',
+  plane: 'planes',
 };
 
 export async function POST(req: NextRequest) {

@@ -4,13 +4,11 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useGameStore } from '@/lib/game-store';
 import { formatCash, formatNumber } from '@/lib/format';
 
 export default function DashboardScreen() {
-  const { player, refreshPlayer, addToast } = useGameStore();
+  const { player, refreshPlayer } = useGameStore();
 
   useEffect(() => {
     fetch('/api/game/seed-bots', { method: 'POST' }).catch(() => {});
@@ -37,24 +35,17 @@ export default function DashboardScreen() {
     { label: 'Soldiers', value: player.soldiers, nw: player.soldiers * 600, icon: '🛡️' },
   ];
 
-  const narcotics = [
-    { label: 'Alcohol', value: player.alcohol, nw: player.alcohol * 1, icon: '🍺' },
-    { label: 'Weed', value: player.weed, nw: player.weed * 2, icon: '🌿' },
-    { label: 'Cocaine', value: player.coke, nw: player.coke * 5, icon: '❄️' },
+  const supplies = [
+    { label: 'Food', value: player.food, nw: player.food * 3, icon: '🍕' },
   ];
 
   const weapons = [
-    { label: 'Glocks', value: player.glocks, nw: player.glocks * 400, icon: '🔫' },
-    { label: 'Shotguns', value: player.shotguns, nw: player.shotguns * 800, icon: '💥' },
-    { label: 'Uzis', value: player.uzis, nw: player.uzis * 2000, icon: '🔥' },
-    { label: 'AK-47s', value: player.ak47s, nw: player.ak47s * 4000, icon: '⚔️' },
+    { label: 'Weapons', value: player.weapons, nw: player.weapons * 1000, icon: '🔫' },
   ];
 
   const vehicles = [
-    { label: 'Chrysler 300', value: player.chryslers, nw: player.chryslers * 8000, icon: '🚗' },
-    { label: 'S-Class Limo', value: player.limos, nw: player.limos * 40000, icon: '🚘' },
-    { label: 'Gulfstream Jet', value: player.gulfstreams, nw: player.gulfstreams * 40000, icon: '✈️' },
-    { label: 'Boeing 737', value: player.boeings, nw: player.boeings * 250000, icon: '🛫' },
+    { label: 'Cars', value: player.cars, nw: player.cars * 20000, icon: '🚗' },
+    { label: 'Planes', value: player.planes, nw: player.planes * 100000, icon: '✈️' },
   ];
 
   const opColor = player.opHappiness >= 70 ? 'text-emerald-400' : player.opHappiness >= 40 ? 'text-amber-400' : 'text-red-400';
@@ -124,7 +115,7 @@ export default function DashboardScreen() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <StatCard title="Units" items={units} />
-        <StatCard title="Narcotics" items={narcotics} />
+        <StatCard title="Supplies" items={supplies} />
         <StatCard title="Weapons" items={weapons} />
         <StatCard title="Vehicles & Planes" items={vehicles} />
       </div>

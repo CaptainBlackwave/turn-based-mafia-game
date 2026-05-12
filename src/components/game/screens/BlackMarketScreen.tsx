@@ -42,7 +42,7 @@ export default function BlackMarketScreen() {
   };
 
   const allItems = [
-    ...BLACK_MARKET_ITEMS.narcotics.map(i => ({ ...i, category: 'Narcotics' as const, field: i.id })),
+    ...BLACK_MARKET_ITEMS.supplies.map(i => ({ ...i, category: 'Supplies' as const, field: i.id })),
     ...BLACK_MARKET_ITEMS.weapons.map(i => ({ ...i, category: 'Weapons' as const, field: i.id })),
     ...BLACK_MARKET_ITEMS.cars.map(i => ({ ...i, category: 'Cars' as const, field: i.id })),
     ...BLACK_MARKET_ITEMS.planes.map(i => ({ ...i, category: 'Planes' as const, field: i.id })),
@@ -50,10 +50,10 @@ export default function BlackMarketScreen() {
 
   const getOwned = (itemId: string): number => {
     const map: Record<string, number> = {
-      alcohol: player.alcohol, weed: player.weed, coke: player.coke,
-      glock: player.glocks, shotgun: player.shotguns, uzi: player.uzis, ak47: player.ak47s,
-      chrysler: player.chryslers, limo: player.limos,
-      gulfstream: player.gulfstreams, boeing: player.boeings,
+      food: player.food,
+      weapon: player.weapons,
+      car: player.cars,
+      plane: player.planes,
     };
     return map[itemId] || 0;
   };
@@ -64,7 +64,7 @@ export default function BlackMarketScreen() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h2 className="text-xl font-bold text-white">Black Market</h2>
-        <p className="mt-1 text-sm text-zinc-500">Buy and sell narcotics, weapons, cars, and planes.</p>
+        <p className="mt-1 text-sm text-zinc-500">Buy and sell supplies, weapons, cars, and planes.</p>
         <div className="mt-2 flex items-center gap-2">
           <span className="text-xs text-zinc-500">Your cash:</span>
           <span className="text-sm font-bold text-emerald-400">{formatCash(player.cash)}</span>
@@ -72,7 +72,7 @@ export default function BlackMarketScreen() {
       </motion.div>
 
       {/* Item categories */}
-      {(['Narcotics', 'Weapons', 'Cars', 'Planes'] as const).map(category => (
+      {(['Supplies', 'Weapons', 'Cars', 'Planes'] as const).map(category => (
         <div key={category}>
           <h3 className="mb-3 text-sm font-semibold text-zinc-400">{category}</h3>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

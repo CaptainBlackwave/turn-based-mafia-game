@@ -11,24 +11,17 @@ export const CITIES = [
 export type CityId = typeof CITIES[number]['id'];
 
 export const BLACK_MARKET_ITEMS = {
-  narcotics: [
-    { id: 'alcohol', name: 'Alcohol', buyPrice: 50, sellPrice: 25, icon: '🍺' },
-    { id: 'weed', name: 'Weed', buyPrice: 100, sellPrice: 50, icon: '🌿' },
-    { id: 'coke', name: 'Cocaine', buyPrice: 200, sellPrice: 100, icon: '❄️' },
+  supplies: [
+    { id: 'food', name: 'Food', buyPrice: 50, sellPrice: 25, icon: '🍕' },
   ],
   weapons: [
-    { id: 'glock', name: 'Glock', buyPrice: 400, sellPrice: 200, icon: '🔫' },
-    { id: 'shotgun', name: 'Shotgun', buyPrice: 800, sellPrice: 400, icon: '💥' },
-    { id: 'uzi', name: 'Uzi', buyPrice: 2000, sellPrice: 1000, icon: '🔥' },
-    { id: 'ak47', name: 'AK-47', buyPrice: 4000, sellPrice: 2000, icon: '⚔️' },
+    { id: 'weapon', name: 'Weapon', buyPrice: 1000, sellPrice: 500, icon: '🔫' },
   ],
   cars: [
-    { id: 'chrysler', name: 'Chrysler 300', buyPrice: 8000, sellPrice: 4000, icon: '🚗', capacity: 5 },
-    { id: 'limo', name: 'S-Class Limo', buyPrice: 40000, sellPrice: 20000, icon: '🚘', capacity: 10 },
+    { id: 'car', name: 'Armored Car', buyPrice: 20000, sellPrice: 10000, icon: '🚗', capacity: 8 },
   ],
   planes: [
-    { id: 'gulfstream', name: 'Gulfstream Jet', buyPrice: 40000, sellPrice: 20000, icon: '✈️', capacity: 40 },
-    { id: 'boeing', name: 'Boeing 737', buyPrice: 250000, sellPrice: 125000, icon: '🛫', capacity: 300 },
+    { id: 'plane', name: 'Private Jet', buyPrice: 100000, sellPrice: 50000, icon: '✈️', capacity: 50 },
   ],
 } as const;
 
@@ -36,7 +29,7 @@ export const ATTACK_TYPES = [
   {
     id: 'raid',
     name: 'Raid',
-    description: 'Invade enemy headquarters. Steal cash and kill units if you win.',
+    description: 'Invade enemy headquarters. Steal cash and kill units.',
     icon: '💰',
     color: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
@@ -44,8 +37,8 @@ export const ATTACK_TYPES = [
   },
   {
     id: 'sabotage',
-    name: 'Sabotage Drug Labs',
-    description: 'Kill enemy soldiers and steal weapons and drugs.',
+    name: 'Sabotage',
+    description: 'Raid supplies. Steal food and weapons, kill soldiers.',
     icon: '💣',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
@@ -54,7 +47,7 @@ export const ATTACK_TYPES = [
   {
     id: 'driveby',
     name: 'Drive-By Shooting',
-    description: 'Maximum damage attack. Requires cars. No resources stolen.',
+    description: 'Maximum damage using cars. No resources stolen.',
     icon: '🚗',
     color: 'text-rose-400',
     bgColor: 'bg-rose-500/10',
@@ -76,43 +69,10 @@ export const HIRE_TYPES = [
   {
     id: 'soldier',
     name: 'Soldier',
-    description: 'Scouts for soldiers who fight, defend, and produce narcotics.',
+    description: 'Scouts for soldiers who fight and defend your empire.',
     icon: '🛡️',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
-  },
-] as const;
-
-export const PRODUCE_TYPES = [
-  {
-    id: 'alcohol',
-    name: 'Alcohol',
-    description: 'Your operatives produce alcohol in the speakeasy. 3 per operative per turn.',
-    icon: '🍺',
-    requires: 'operatives',
-    rate: 3,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/10',
-  },
-  {
-    id: 'coke',
-    name: 'Cocaine',
-    description: 'Your soldiers produce cocaine in the drug lab. 3 per soldier per turn.',
-    icon: '❄️',
-    requires: 'soldiers',
-    rate: 3,
-    color: 'text-sky-400',
-    bgColor: 'bg-sky-500/10',
-  },
-  {
-    id: 'weed',
-    name: 'Weed',
-    description: 'Your soldiers produce weed in the drug lab. 3 per soldier per turn.',
-    icon: '🌿',
-    requires: 'soldiers',
-    rate: 3,
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/10',
   },
 ] as const;
 
@@ -133,7 +93,6 @@ export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
   { id: 'hire', label: 'Hire', icon: 'UserPlus' },
   { id: 'blackmarket', label: 'Black Market', icon: 'ShoppingCart' },
-  { id: 'produce', label: 'Produce', icon: 'Factory' },
   { id: 'collect', label: 'Collect', icon: 'Wallet' },
   { id: 'bank', label: 'Bank', icon: 'Landmark' },
   { id: 'attack', label: 'Attack', icon: 'Crosshair' },

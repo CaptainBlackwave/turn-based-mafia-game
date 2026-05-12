@@ -62,8 +62,8 @@ export async function POST(req: NextRequest) {
 
     // Resolve attack
     const result = resolveAttack(
-      { soldiers: player.soldiers, glocks: player.glocks, shotguns: player.shotguns, uzis: player.uzis, ak47s: player.ak47s, chryslers: player.chryslers, limos: player.limos },
-      { soldiers: target.soldiers, glocks: target.glocks, shotguns: target.shotguns, uzis: target.uzis, ak47s: target.ak47s, operatives: target.operatives },
+      { soldiers: player.soldiers, weapons: player.weapons, cars: player.cars },
+      { soldiers: target.soldiers, weapons: target.weapons, operatives: target.operatives },
       attackType
     );
 
@@ -71,24 +71,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You need cars for a drive-by' }, { status: 400 });
     }
 
-    // Calculate stolen resources
+    // Calculate stolen resources / extra kills
     let cashStolen = 0;
     let weaponsStolen = 0;
-    let drugsStolen = 0;
+    let foodStolen = 0;
     let opsKilled = 0;
 
     if (result.success) {
       switch (attackType) {
         case 'raid':
-          cashStolen = Math.floor(target.cash * 0.15 * Math.random());
-          opsKilled = Math.ceil(target.operatives * 0.05 * Math.random());
+          // Steal 8-25% of cash, kill 10-25% of soldiers, kill 5-15% of operatives
+          const raidCashPct = 0.08 + Math.random() * 0.17;
+          cashStolen = Math.floor(target.cash * raidCashPct);
+          const raidSoldierKillPct = 0.10 + Math.random() * 0.15;
+          result.defenderLosses = Math.max(result.defenderLosses, Math.ceil(target.soldiers * raidSoldierKillPct));
+          const raidOpsKillPct = 0.05 + Math.random() * 0.10;
+          opsKilled = Math.ceil(target.operatives * raidOpsKillPct);
           break;
         case 'sabotage':
-          weaponsStolen = Math.floor((target.glocks + target.shotguns + target.uzis + target.ak47s) * 0.1 * Math.random());
-          drugsStolen = Math.floor((target.alcohol + target.weed + target.coke) * 0.1 * Math.random());
+          // Steal 10-25% of food and weapons, kill 8-20% of soldiers
+          const sabFoodPct = 0.10 + Math.random() * 0.15;
+          foodStolen = Math.floor(target.food * sabFoodPct);
+          const sabWeaponPct = 0.10 + Math.random() * 0.15;
+          weaponsStolen = Math.floor(target.weapons * sabWeaponPct);
+          const sabSoldierKillPct = 0.08 + Math.random() * 0.12;
+          result.defenderLosses = Math.max(result.defenderLosses, Math.ceil(target.soldiers * sabSoldierKillPct));
           break;
         case 'driveby':
-          // Drive-by: max damage, no steals
+          // Drive-by: max damage already calculated, no steals
           break;
       }
     }
@@ -104,7 +114,7 @@ export async function POST(req: NextRequest) {
         opsKilled,
         soldiersKilled: result.defenderLosses,
         weaponsStolen,
-        drugsStolen,
+        foodStolen,
       },
     });
 
@@ -114,16 +124,8 @@ export async function POST(req: NextRequest) {
       soldiers: { decrement: result.attackerLosses },
     };
     if (cashStolen > 0) attackerUpdates.cash = { increment: cashStolen };
-    if (weaponsStolen > 0) {
-      // Give random mix of weapons
-      attackerUpdates.glocks = { increment: Math.ceil(weaponsStolen * 0.4) };
-      attackerUpdates.shotguns = { increment: Math.ceil(weaponsStolen * 0.3) };
-    }
-    if (drugsStolen > 0) {
-      attackerUpdates.alcohol = { increment: Math.ceil(drugsStolen * 0.5) };
-      attackerUpdates.weed = { increment: Math.ceil(drugsStolen * 0.3) };
-      attackerUpdates.coke = { increment: Math.ceil(drugsStolen * 0.2) };
-    }
+    if (weaponsStolen > 0) attackerUpdates.weapons = { increment: weaponsStolen };
+    if (foodStolen > 0) attackerUpdates.food = { increment: foodStolen };
 
     const updatedAttacker = await db.player.update({
       where: { id: player.id },
@@ -136,15 +138,8 @@ export async function POST(req: NextRequest) {
     };
     if (cashStolen > 0) defenderUpdates.cash = { decrement: cashStolen };
     if (opsKilled > 0) defenderUpdates.operatives = { decrement: opsKilled };
-    if (weaponsStolen > 0) {
-      defenderUpdates.glocks = { decrement: Math.min(Math.ceil(weaponsStolen * 0.4), target.glocks) };
-      defenderUpdates.shotguns = { decrement: Math.min(Math.ceil(weaponsStolen * 0.3), target.shotguns) };
-    }
-    if (drugsStolen > 0) {
-      defenderUpdates.alcohol = { decrement: Math.min(Math.ceil(drugsStolen * 0.5), target.alcohol) };
-      defenderUpdates.weed = { decrement: Math.min(Math.ceil(drugsStolen * 0.3), target.weed) };
-      defenderUpdates.coke = { decrement: Math.min(Math.ceil(drugsStolen * 0.2), target.coke) };
-    }
+    if (weaponsStolen > 0) defenderUpdates.weapons = { decrement: Math.min(weaponsStolen, target.weapons) };
+    if (foodStolen > 0) defenderUpdates.food = { decrement: Math.min(foodStolen, target.food) };
 
     const updatedDefender = await db.player.update({
       where: { id: target.id },
@@ -160,11 +155,11 @@ export async function POST(req: NextRequest) {
         defenderLosses: result.defenderLosses,
         cashStolen,
         weaponsStolen,
-        drugsStolen,
+        foodStolen,
         opsKilled,
       },
       message: result.success
-        ? `Attack successful! Killed ${result.defenderLosses} soldiers${cashStolen > 0 ? `, stole $${cashStolen.toLocaleString()}` : ''}`
+        ? `Attack successful! Killed ${result.defenderLosses} soldiers${opsKilled > 0 ? `, ${opsKilled} operatives` : ''}${cashStolen > 0 ? `, stole $${cashStolen.toLocaleString()}` : ''}${foodStolen > 0 ? `, ${foodStolen} food` : ''}${weaponsStolen > 0 ? `, ${weaponsStolen} weapons` : ''}`
         : `Attack failed! Lost ${result.attackerLosses} soldiers`,
     });
   } catch (err) {

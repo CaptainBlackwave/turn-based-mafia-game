@@ -25,13 +25,13 @@ export async function POST() {
 
     const tieredStats = [
       // Tier 1 (top 5): Strong bots
-      { ops: [50, 80], soldiers: [40, 70], cash: [500000, 1500000], bank: [200000, 800000], glocks: [30, 60], shotguns: [15, 30], uzis: [10, 20], ak47s: [5, 15], alcohol: [200, 500], weed: [100, 300], coke: [50, 150], chryslers: [5, 10], limos: [2, 5], gulfstreams: [1, 3], boeings: [0, 1] },
+      { ops: [50, 80], soldiers: [40, 70], cash: [500000, 1500000], bank: [200000, 800000], food: [300, 600], weapons: [50, 100], cars: [8, 15], planes: [2, 5] },
       // Tier 2 (5-10): Medium bots
-      { ops: [25, 50], soldiers: [20, 40], cash: [100000, 500000], bank: [50000, 200000], glocks: [15, 30], shotguns: [8, 15], uzis: [5, 10], ak47s: [2, 8], alcohol: [100, 200], weed: [50, 100], coke: [25, 75], chryslers: [2, 5], limos: [1, 2], gulfstreams: [0, 1], boeings: [0, 0] },
+      { ops: [25, 50], soldiers: [20, 40], cash: [100000, 500000], bank: [50000, 200000], food: [150, 300], weapons: [25, 50], cars: [4, 8], planes: [1, 2] },
       // Tier 3 (10-15): Low-medium bots
-      { ops: [10, 25], soldiers: [8, 20], cash: [20000, 100000], bank: [10000, 50000], glocks: [5, 15], shotguns: [3, 8], uzis: [1, 5], ak47s: [0, 3], alcohol: [50, 100], weed: [25, 50], coke: [10, 30], chryslers: [1, 3], limos: [0, 1], gulfstreams: [0, 0], boeings: [0, 0] },
+      { ops: [10, 25], soldiers: [8, 20], cash: [20000, 100000], bank: [10000, 50000], food: [50, 150], weapons: [10, 25], cars: [2, 4], planes: [0, 1] },
       // Tier 4 (15-20): Weak bots
-      { ops: [2, 10], soldiers: [2, 8], cash: [5000, 20000], bank: [0, 10000], glocks: [1, 5], shotguns: [0, 3], uzis: [0, 2], ak47s: [0, 1], alcohol: [10, 50], weed: [5, 25], coke: [0, 10], chryslers: [0, 1], limos: [0, 0], gulfstreams: [0, 0], boeings: [0, 0] },
+      { ops: [2, 10], soldiers: [2, 8], cash: [5000, 20000], bank: [0, 10000], food: [10, 50], weapons: [2, 10], cars: [0, 2], planes: [0, 0] },
     ];
 
     for (let i = 0; i < BOT_NAMES.length; i++) {
@@ -48,17 +48,10 @@ export async function POST() {
           turns: rand(200, 500),
           operatives: rand(tier.ops[0], tier.ops[1]),
           soldiers: rand(tier.soldiers[0], tier.soldiers[1]),
-          glocks: rand(tier.glocks[0], tier.glocks[1]),
-          shotguns: rand(tier.shotguns[0], tier.shotguns[1]),
-          uzis: rand(tier.uzis[0], tier.uzis[1]),
-          ak47s: rand(tier.ak47s[0], tier.ak47s[1]),
-          alcohol: rand(tier.alcohol[0], tier.alcohol[1]),
-          weed: rand(tier.weed[0], tier.weed[1]),
-          coke: rand(tier.coke[0], tier.coke[1]),
-          chryslers: rand(tier.chryslers[0], tier.chryslers[1]),
-          limos: rand(tier.limos[0], tier.limos[1]),
-          gulfstreams: rand(tier.gulfstreams[0], tier.gulfstreams[1]),
-          boeings: rand(tier.boeings[0], tier.boeings[1]),
+          food: rand(tier.food[0], tier.food[1]),
+          weapons: rand(tier.weapons[0], tier.weapons[1]),
+          cars: rand(tier.cars[0], tier.cars[1]),
+          planes: rand(tier.planes[0], tier.planes[1]),
           city,
         },
       });

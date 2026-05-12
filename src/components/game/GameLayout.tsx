@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Menu, X, LayoutDashboard, UserPlus, ShoppingCart, Factory,
+  Menu, X, LayoutDashboard, UserPlus, ShoppingCart,
   Wallet, Landmark, Crosshair, MapPin, Users, Trophy, BookOpen, LogOut,
   RefreshCw,
 } from 'lucide-react';
@@ -15,7 +15,6 @@ import GameHUD from './GameHUD';
 import DashboardScreen from './screens/DashboardScreen';
 import HireScreen from './screens/HireScreen';
 import BlackMarketScreen from './screens/BlackMarketScreen';
-import ProduceScreen from './screens/ProduceScreen';
 import CollectScreen from './screens/CollectScreen';
 import BankScreen from './screens/BankScreen';
 import AttackScreen from './screens/AttackScreen';
@@ -25,7 +24,7 @@ import LeaderboardScreen from './screens/LeaderboardScreen';
 import GuideScreen from './screens/GuideScreen';
 
 const ICON_MAP: Record<string, any> = {
-  LayoutDashboard, UserPlus, ShoppingCart, Factory,
+  LayoutDashboard, UserPlus, ShoppingCart,
   Wallet, Landmark, Crosshair, MapPin, Users, Trophy, BookOpen,
 };
 
@@ -33,7 +32,6 @@ const SCREEN_MAP: Record<string, React.ComponentType> = {
   dashboard: DashboardScreen,
   hire: HireScreen,
   blackmarket: BlackMarketScreen,
-  produce: ProduceScreen,
   collect: CollectScreen,
   bank: BankScreen,
   attack: AttackScreen,

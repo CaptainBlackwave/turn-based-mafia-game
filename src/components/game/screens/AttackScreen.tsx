@@ -201,7 +201,7 @@ export default function AttackScreen() {
                   </div>
                   <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] p-2">
                     <p className="text-xs text-zinc-500">Enemy losses</p>
-                    <p className="font-medium text-white">{result.defenderLosses} soldiers</p>
+                    <p className="font-medium text-white">{result.defenderLosses} soldiers{result.opsKilled > 0 ? ` + ${result.opsKilled} ops` : ''}</p>
                   </div>
                   {result.cashStolen > 0 && (
                     <div className="rounded-lg border border-emerald-500/10 bg-emerald-500/5 p-2">
@@ -209,10 +209,16 @@ export default function AttackScreen() {
                       <p className="font-medium text-emerald-400">{formatCash(result.cashStolen)}</p>
                     </div>
                   )}
-                  {result.drugsStolen > 0 && (
+                  {result.foodStolen > 0 && (
                     <div className="rounded-lg border border-emerald-500/10 bg-emerald-500/5 p-2">
-                      <p className="text-xs text-zinc-500">Drugs stolen</p>
-                      <p className="font-medium text-emerald-400">{result.drugsStolen}</p>
+                      <p className="text-xs text-zinc-500">Food stolen</p>
+                      <p className="font-medium text-emerald-400">{result.foodStolen} 🍕</p>
+                    </div>
+                  )}
+                  {result.weaponsStolen > 0 && (
+                    <div className="rounded-lg border border-emerald-500/10 bg-emerald-500/5 p-2">
+                      <p className="text-xs text-zinc-500">Weapons stolen</p>
+                      <p className="font-medium text-emerald-400">{result.weaponsStolen} 🔫</p>
                     </div>
                   )}
                 </div>
