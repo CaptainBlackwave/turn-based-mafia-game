@@ -27,66 +27,32 @@ export const BLACK_MARKET_ITEMS = {
 
 export const ATTACK_TYPES = [
   {
-    id: 'raid',
-    name: 'Raid',
-    description: 'Invade enemy headquarters. Steal cash and kill units.',
-    icon: '💰',
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/10',
-    borderColor: 'border-amber-500/20',
+    id: 'raid', name: 'Raid', description: 'Invade enemy headquarters. Steal cash and kill units.',
+    icon: '💰', color: 'text-amber-400', bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/20',
   },
   {
-    id: 'sabotage',
-    name: 'Sabotage',
-    description: 'Raid supplies. Steal food and weapons, kill soldiers.',
-    icon: '💣',
-    color: 'text-red-400',
-    bgColor: 'bg-red-500/10',
-    borderColor: 'border-red-500/20',
+    id: 'sabotage', name: 'Sabotage', description: 'Raid supplies. Steal food and weapons, kill soldiers.',
+    icon: '💣', color: 'text-red-400', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/20',
   },
   {
-    id: 'driveby',
-    name: 'Drive-By Shooting',
-    description: 'Maximum damage using cars. No resources stolen.',
-    icon: '🚗',
-    color: 'text-rose-400',
-    bgColor: 'bg-rose-500/10',
-    borderColor: 'border-rose-500/20',
+    id: 'driveby', name: 'Drive-By Shooting', description: 'Maximum damage using cars. No resources stolen.',
+    icon: '🚗', color: 'text-rose-400', bgColor: 'bg-rose-500/10', borderColor: 'border-rose-500/20',
+  },
+  {
+    id: 'bank', name: 'Bank Raid', description: 'Attack enemy bank vault. Steal from their bank balance.',
+    icon: '🏦', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/20',
   },
 ] as const;
 
 export type AttackType = typeof ATTACK_TYPES[number]['id'];
 
 export const HIRE_TYPES = [
-  {
-    id: 'operative',
-    name: 'Operative',
-    description: 'Scouts for operatives who run businesses and produce income.',
-    icon: '💼',
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-  },
-  {
-    id: 'soldier',
-    name: 'Soldier',
-    description: 'Scouts for soldiers who fight and defend your empire.',
-    icon: '🛡️',
-    color: 'text-red-400',
-    bgColor: 'bg-red-500/10',
-  },
+  { id: 'operative', name: 'Operative', description: 'Scouts for operatives who produce income.', icon: '💼', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10' },
+  { id: 'soldier', name: 'Soldier', description: 'Scouts for soldiers who fight and defend.', icon: '🛡️', color: 'text-red-400', bgColor: 'bg-red-500/10' },
 ] as const;
 
 export const COLLECT_TYPES = [
-  {
-    id: 'collect',
-    name: 'Collect Income',
-    description: 'Your operatives collect cash from all businesses. $200 per operative per turn.',
-    icon: '💵',
-    requires: 'operatives',
-    rate: 200,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-  },
+  { id: 'collect', name: 'Collect Income', description: 'Your operatives collect cash. $200 per operative per turn.', icon: '💵', requires: 'operatives', rate: 200, color: 'text-emerald-400', bgColor: 'bg-emerald-500/10' },
 ] as const;
 
 export const NAV_ITEMS = [
@@ -98,8 +64,13 @@ export const NAV_ITEMS = [
   { id: 'attack', label: 'Attack', icon: 'Crosshair' },
   { id: 'travel', label: 'Travel', icon: 'MapPin' },
   { id: 'family', label: 'Family', icon: 'Users' },
-  { id: 'leaderboard', label: 'Leaderboard', icon: 'Trophy' },
+  { id: 'gambling', label: 'Casino', icon: 'Dices' },
+  { id: 'credits', label: 'Credits', icon: 'CreditCard' },
+  { id: 'unions', label: 'Unions', icon: 'Shield' },
+  { id: 'transfers', label: 'Transfers', icon: 'ArrowLeftRight' },
+  { id: 'leaderboard', label: 'Rankings', icon: 'Trophy' },
   { id: 'guide', label: 'Guide', icon: 'BookOpen' },
+  { id: 'admin', label: 'Admin', icon: 'Settings' },
 ] as const;
 
 export type ScreenId = typeof NAV_ITEMS[number]['id'];
@@ -111,7 +82,13 @@ export const BOT_NAMES = [
   'Bumpy Johnson', 'Raymond Patriarca', 'Carlos Marcello', 'Sam Giancana', 'Nicky Scarfo',
 ] as const;
 
-export const MAX_TURNS = 500;
-export const STARTING_TURNS = 100;
-export const STARTING_CASH = 5000;
+export const SUBSCRIPTION_TIERS = [
+  { id: 'Free', color: 'text-zinc-400', bg: 'bg-zinc-500/10' },
+  { id: 'Titanium', color: 'text-slate-300', bg: 'bg-slate-400/10' },
+  { id: 'Diamond', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+  { id: 'Onyx', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+] as const;
+
+export const DEFAULT_STARTING_TURNS = 100;
+export const DEFAULT_STARTING_CASH = 5000;
 export const PROTECTION_HOURS = 24;

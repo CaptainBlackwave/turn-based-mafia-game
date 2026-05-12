@@ -1,35 +1,29 @@
 import { NextResponse } from 'next/server';
+import { getSession } from '@/lib/api-auth';
+import { calculateTurnRegen, REGEN_INTERVAL_MS } from '@/lib/game-engine';
+import { deserializeSettings, getTieredValue } from '@/lib/settings';
 import { db } from '@/lib/db';
-import { hashToken } from '@/lib/session';
-import { cookies } from 'next/headers';
-import { MAX_TURNS, calculateTurnRegen } from '@/lib/game-engine';
 
-async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('session_token')?.value;
-  if (!token) return null;
-  const hashedToken = hashToken(token);
-  const session = await db.session.findUnique({
-    where: { token: hashedToken },
-    include: { player: true },
-  });
-  return session?.player ?? null;
-}
-
-// Also regen turns for bots
 export async function POST() {
   try {
     const player = await getSession();
     if (!player) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const now = new Date();
-    const turnsToRegen = calculateTurnRegen(player.lastMaxCheck, now);
+    const tier = (player.subscriptionTier || 'Free') as 'Free' | 'Titanium' | 'Diamond' | 'Onyx';
+
+    const activeRound = await db.round.findFirst({ where: { status: 'active' } });
+    const settings = activeRound ? deserializeSettings(activeRound.settings) : null;
+    const regenRate = settings ? getTieredValue(settings.regenPer10min, tier) : 5;
+    const maxTurns = settings ? getTieredValue(settings.maxTurns, tier) : 500;
+
+    const turnsToRegen = calculateTurnRegen(player.lastMaxCheck, now, regenRate);
 
     if (turnsToRegen <= 0) {
       return NextResponse.json({ message: 'No turns to regenerate', turnsRegen: 0 });
     }
 
-    const newTurns = Math.min(player.turns + turnsToRegen, MAX_TURNS);
+    const newTurns = Math.min(player.turns + turnsToRegen, maxTurns);
 
     const updated = await db.player.update({
       where: { id: player.id },

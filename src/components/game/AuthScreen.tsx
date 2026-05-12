@@ -37,34 +37,19 @@ export default function AuthScreen() {
         return;
       }
 
-      // Calculate networth and happiness
       const p = data.player;
-      const networth = p.operatives * 1500 + p.soldiers * 600 +
-        p.alcohol * 1 + p.weed * 2 + p.coke * 5 +
-        p.glocks * 400 + p.shotguns * 800 + p.uzis * 2000 + p.ak47s * 4000 +
-        p.chryslers * 8000 + p.limos * 40000 +
-        p.gulfstreams * 40000 + p.boeings * 250000 +
-        p.cash + p.bank;
-
-      const opHappiness = p.operatives === 0 ? 100 : Math.min(
-        Math.round(
-          (Math.min(p.alcohol / Math.max(p.operatives, 1), 1) * 30 +
-           Math.min(p.coke / Math.max(p.operatives, 1), 1) * 35 +
-           Math.min(p.soldiers / Math.max(p.operatives * 0.5, 1), 1) * 35)
-        ), 100);
-
-      const soldierHappiness = p.soldiers === 0 ? 100 : Math.min(
-        Math.round(
-          (Math.min(p.alcohol / Math.max(p.soldiers, 1), 1) * 25 +
-           Math.min(p.weed / Math.max(p.soldiers, 1), 1) * 30 +
-           Math.min((p.glocks + p.shotguns + p.uzis + p.ak47s) / Math.max(p.soldiers * 2, 1), 1) * 45)
-        ), 100);
-
       setLoggedIn('', {
         ...p,
-        networth,
-        opHappiness,
-        soldierHappiness,
+        networth: p.networth || 0,
+        opHappiness: p.opHappiness || 100,
+        soldierHappiness: p.soldierHappiness || 100,
+        maxTurns: p.maxTurns || 500,
+        reserves: p.reserves || 0,
+        credits: p.credits || 0,
+        subscriptionTier: p.subscriptionTier || 'Free',
+        isAdmin: p.isAdmin || false,
+        unionId: p.unionId || null,
+        familyName: p.familyName || null,
       });
     } catch {
       setError('Network error. Please try again.');
@@ -75,7 +60,6 @@ export default function AuthScreen() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0a0a0f] px-4">
-      {/* Background pattern */}
       <div className="pointer-events-none fixed inset-0 opacity-[0.02]" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }} />
@@ -86,11 +70,9 @@ export default function AuthScreen() {
         transition={{ duration: 0.5 }}
         className="relative w-full max-w-md"
       >
-        {/* Glow effect */}
         <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-b from-[#d4af37]/20 via-transparent to-[#d4af37]/10 blur-xl" />
 
         <div className="relative rounded-2xl border border-white/[0.08] bg-[#0f0f18]/90 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
-          {/* Logo */}
           <div className="mb-8 text-center">
             <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d4af37]/10 ring-1 ring-[#d4af37]/20">
               <Skull className="h-8 w-8 text-[#d4af37]" />
@@ -103,14 +85,11 @@ export default function AuthScreen() {
             </p>
           </div>
 
-          {/* Tabs */}
           <div className="mb-6 flex rounded-lg border border-white/[0.06] bg-white/[0.02] p-1">
             <button
               onClick={() => { setIsLogin(true); setError(''); }}
               className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-                isLogin
-                  ? 'bg-[#d4af37]/10 text-[#d4af37] shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                isLogin ? 'bg-[#d4af37]/10 text-[#d4af37] shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
               Sign In
@@ -118,16 +97,13 @@ export default function AuthScreen() {
             <button
               onClick={() => { setIsLogin(false); setError(''); }}
               className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-                !isLogin
-                  ? 'bg-[#d4af37]/10 text-[#d4af37] shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                !isLogin ? 'bg-[#d4af37]/10 text-[#d4af37] shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
               Register
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label className="mb-1.5 text-xs font-medium text-zinc-400">Username</Label>

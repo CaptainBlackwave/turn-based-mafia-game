@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateSessionToken, hashToken } from '@/lib/session';
+import { calculateNetworth, calculateOpHappiness, calculateSoldierHappiness } from '@/lib/game-engine';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
@@ -25,7 +26,6 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-
     const protectedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const player = await db.player.create({
@@ -52,6 +52,8 @@ export async function POST(req: NextRequest) {
         cash: player.cash,
         bank: player.bank,
         turns: player.turns,
+        reserves: player.reserves,
+        credits: player.credits,
         operatives: player.operatives,
         soldiers: player.soldiers,
         food: player.food,
@@ -60,8 +62,13 @@ export async function POST(req: NextRequest) {
         planes: player.planes,
         city: player.city,
         familyId: player.familyId,
-        protectedUntil: player.protectedUntil?.toISOString() ?? null,
+        subscriptionTier: player.subscriptionTier,
+        isAdmin: player.isAdmin,
         isBot: player.isBot,
+        protectedUntil: player.protectedUntil?.toISOString() ?? null,
+        networth: calculateNetworth(player),
+        opHappiness: calculateOpHappiness(player),
+        soldierHappiness: calculateSoldierHappiness(player),
       },
     });
 

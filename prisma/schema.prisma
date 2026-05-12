@@ -7,22 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==================== PLAYER ====================
 model Player {
   id             String   @id @default(cuid())
   username       String   @unique
   passwordHash   String
   isBot          Boolean  @default(false)
+  isAdmin        Boolean  @default(false)
+  
+  // Subscription tier: Free, Titanium, Diamond, Onyx
+  subscriptionTier String @default("Free")
   
   // Resources
   cash           Int      @default(5000)
   bank           Int      @default(0)
   turns          Int      @default(100)
+  reserves       Int      @default(0)  // Turns not against cap
+  credits        Int      @default(0)  // Purchased credits
   
   // Units
   operatives     Int      @default(0)
   soldiers       Int      @default(0)
   
-  // Supplies (replaces narcotics - now just food)
+  // Supplies
   food           Int      @default(0)
   
   // Weapons (consolidated to 1 type)
@@ -37,35 +44,89 @@ model Player {
   // Game state
   city           String   @default("New York")
   familyId       String?
+  unionId        String?
+  
+  // Family roles: 'member', 'underboss', 'consigliere', 'boss'
+  familyRank     String   @default("member")
+  
+  // Union roles: 'member', 'officer', 'leader'
+  unionRank      String   @default("member")
   
   // Protection
   protectedUntil DateTime?
   
-  // Maxing tracking
+  // Tracking
   lastMaxCheck   DateTime @default(now())
+  
+  // Gambling tracking
+  coinFlipsToday Int      @default(0)
+  roulettesToday Int      @default(0)
+  horseRacesToday Int    @default(0)
+  lastGambleReset DateTime @default(now())
+  
+  // Credits tracking
+  creditsUsedThisRound Int @default(0)
+  creditsBoughtToday   Int @default(0)
+  lastCreditReset      DateTime @default(now())
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
   family         Family?  @relation(fields: [familyId], references: [id])
   familyBossOf   Family?  @relation("FamilyBoss")
+  union          Union?   @relation(fields: [unionId], references: [id])
+  unionLeaderOf   Union?   @relation("UnionLeader")
   attacksInitiated Attack[] @relation("Attacker")
   attacksReceived  Attack[] @relation("Defender")
   sessions         Session[]
+  gamblingLogs     GamblingLog[]
+  creditTransactions CreditTransaction[]
+  transfersSent     Transfer[] @relation("TransferFrom")
+  transfersReceived Transfer[] @relation("TransferTo")
 }
 
+// ==================== FAMILY ====================
 model Family {
   id          String   @id @default(cuid())
   name        String   @unique
   bossId      String   @unique
   city        String   @default("New York")
+  bank        Int      @default(0)   // Family bank
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   boss        Player   @relation("FamilyBoss", fields: [bossId], references: [id])
   members     Player[]
+  unionFamilies UnionFamily[]
 }
 
+// ==================== UNION ====================
+model Union {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  leaderId    String   @unique
+  bank        Int      @default(0)   // Union bank
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  leader      Player   @relation("UnionLeader", fields: [leaderId], references: [id])
+  members     Player[]
+  families    UnionFamily[]
+}
+
+model UnionFamily {
+  id          String   @id @default(cuid())
+  unionId     String
+  familyId    String
+  joinedAt    DateTime @default(now())
+  
+  union       Union    @relation(fields: [unionId], references: [id], onDelete: Cascade)
+  family      Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  
+  @@unique([unionId, familyId])
+}
+
+// ==================== SESSION ====================
 model Session {
   id        String   @id @default(cuid())
   token     String   @unique
@@ -75,11 +136,12 @@ model Session {
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 }
 
+// ==================== ATTACK ====================
 model Attack {
   id          String   @id @default(cuid())
   attackerId  String
   defenderId  String
-  type        String   // "raid", "sabotage", "driveby"
+  type        String   // "raid", "sabotage", "driveby", "bank"
   success     Boolean
   
   // Results
@@ -89,9 +151,63 @@ model Attack {
   weaponsStolen Int    @default(0)
   foodStolen  Int      @default(0)
   carsStolen  Int      @default(0)
+  bankStolen  Int      @default(0)  // For bank attacks
   
   createdAt   DateTime @default(now())
   
   attacker    Player   @relation("Attacker", fields: [attackerId], references: [id])
   defender    Player   @relation("Defender", fields: [defenderId], references: [id])
+}
+
+// ==================== ROUND ====================
+model Round {
+  id          String   @id @default(cuid())
+  number      Int      @unique
+  name        String
+  status      String   @default("upcoming")  // "upcoming", "active", "ended"
+  startedAt   DateTime?
+  endedAt     DateTime?
+  settings    String   // JSON string of all round settings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==================== GAMBLING ====================
+model GamblingLog {
+  id          String   @id @default(cuid())
+  playerId    String
+  gameType    String   // "coinflip", "blackjack", "roulette", "horserace"
+  betAmount   Int
+  won         Boolean
+  payout      Int      @default(0)
+  details     String?  // JSON with game-specific data
+  createdAt   DateTime @default(now())
+  
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+// ==================== CREDIT TRANSACTION ====================
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  playerId    String
+  type        String   // "donation", "redeem_reserves", "redeem_turns", "admin_grant"
+  amount      Int
+  description String
+  createdAt   DateTime @default(now())
+  
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+// ==================== TRANSFER ====================
+model Transfer {
+  id          String   @id @default(cuid())
+  fromId      String
+  toId        String
+  amount      Int
+  type        String   // "cash", "food", "weapons", "cars", "planes"
+  quantity    Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  from        Player   @relation("TransferFrom", fields: [fromId], references: [id])
+  to          Player   @relation("TransferTo", fields: [toId], references: [id])
 }

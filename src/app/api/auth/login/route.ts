@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateSessionToken, hashToken } from '@/lib/session';
+import { calculateNetworth, calculateOpHappiness, calculateSoldierHappiness } from '@/lib/game-engine';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
     }
 
-    const player = await db.player.findUnique({ where: { username } });
+    const player = await db.player.findUnique({ where: { username }, include: { family: true } });
     if (!player) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
@@ -39,23 +40,25 @@ export async function POST(req: NextRequest) {
         cash: player.cash,
         bank: player.bank,
         turns: player.turns,
+        reserves: player.reserves,
+        credits: player.credits,
         operatives: player.operatives,
         soldiers: player.soldiers,
-        alcohol: player.alcohol,
-        weed: player.weed,
-        coke: player.coke,
-        glocks: player.glocks,
-        shotguns: player.shotguns,
-        uzis: player.uzis,
-        ak47s: player.ak47s,
-        chryslers: player.chryslers,
-        limos: player.limos,
-        gulfstreams: player.gulfstreams,
-        boeings: player.boeings,
+        food: player.food,
+        weapons: player.weapons,
+        cars: player.cars,
+        planes: player.planes,
         city: player.city,
         familyId: player.familyId,
-        protectedUntil: player.protectedUntil?.toISOString() ?? null,
+        familyName: player.family?.name ?? null,
+        unionId: player.unionId,
+        subscriptionTier: player.subscriptionTier,
+        isAdmin: player.isAdmin,
         isBot: player.isBot,
+        protectedUntil: player.protectedUntil?.toISOString() ?? null,
+        networth: calculateNetworth(player),
+        opHappiness: calculateOpHappiness(player),
+        soldierHappiness: calculateSoldierHappiness(player),
       },
     });
 
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: '/',
     });
 

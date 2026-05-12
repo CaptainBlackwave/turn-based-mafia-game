@@ -1,4 +1,6 @@
-// Game engine - all core game logic
+// Game engine - all core game logic (settings-aware)
+
+import { RoundSettings, getTieredValue, type SubscriptionTier } from './settings';
 
 // ==================== NETWORTH ====================
 export function calculateNetworth(player: {
@@ -17,7 +19,6 @@ export function calculateNetworth(player: {
   const vehicleNW = player.cars * 20000;
   const planeNW = player.planes * 100000;
   const financialNW = player.cash + player.bank;
-
   return unitNW + supplyNW + weaponNW + vehicleNW + planeNW + financialNW;
 }
 
@@ -28,12 +29,8 @@ export function calculateOpHappiness(player: {
   food: number;
 }): number {
   if (player.operatives === 0) return 100;
-
-  // Food supply: each op needs 1 food
   const foodSupply = Math.min(player.food / Math.max(player.operatives, 1), 1);
-  // Protection: 1 soldier per 2 operatives minimum
   const protectionRatio = Math.min(player.soldiers / Math.max(player.operatives * 0.5, 1), 1);
-
   return Math.min(Math.round((foodSupply * 50 + protectionRatio * 50)), 100);
 }
 
@@ -43,12 +40,8 @@ export function calculateSoldierHappiness(player: {
   weapons: number;
 }): number {
   if (player.soldiers === 0) return 100;
-
-  // Food supply: each soldier needs 1 food
   const foodSupply = Math.min(player.food / Math.max(player.soldiers, 1), 1);
-  // Weapon supply: 1 weapon per soldier ideal
   const weaponSupply = Math.min(player.weapons / Math.max(player.soldiers, 1), 1);
-
   return Math.min(Math.round((foodSupply * 50 + weaponSupply * 50)), 100);
 }
 
@@ -66,12 +59,11 @@ export function calculateCombatPower(player: {
 export function resolveAttack(
   attacker: { soldiers: number; weapons: number; cars: number; },
   defender: { soldiers: number; weapons: number; operatives: number; },
-  attackType: 'raid' | 'sabotage' | 'driveby'
+  attackType: 'raid' | 'sabotage' | 'driveby' | 'bank'
 ): { success: boolean; attackerLosses: number; defenderLosses: number } {
   let attackerPower = calculateCombatPower(attacker);
   let defenderPower = calculateCombatPower(defender);
 
-  // Drive-by: only use soldiers that fit in cars
   if (attackType === 'driveby') {
     const carCapacity = attacker.cars * 8;
     const drivebySoldiers = Math.min(attacker.soldiers, carCapacity);
@@ -82,16 +74,12 @@ export function resolveAttack(
     attackerPower = drivebySoldiers * 2 + drivebyWeapons * 2;
   }
 
-  // Random factor ±20%
   const attackerRandom = 0.8 + Math.random() * 0.4;
   const defenderRandom = 0.8 + Math.random() * 0.4;
-
   const finalAttackerPower = attackerPower * attackerRandom;
   const finalDefenderPower = defenderPower * defenderRandom;
-
   const success = finalAttackerPower > finalDefenderPower;
 
-  // Calculate losses
   const totalEngaged = attacker.soldiers + defender.soldiers;
   const intensity = Math.min(totalEngaged / 100, 0.5) + 0.05;
 
@@ -99,11 +87,9 @@ export function resolveAttack(
   let defenderLosses = 0;
 
   if (success) {
-    // Attacker wins - defender loses more
     defenderLosses = Math.ceil(defender.soldiers * intensity * (0.5 + Math.random() * 0.5));
     attackerLosses = Math.ceil(attacker.soldiers * intensity * 0.1 * Math.random());
   } else {
-    // Defender wins - attacker loses more
     attackerLosses = Math.ceil(attacker.soldiers * intensity * (0.5 + Math.random() * 0.5));
     defenderLosses = Math.ceil(defender.soldiers * intensity * 0.1 * Math.random());
   }
@@ -112,9 +98,7 @@ export function resolveAttack(
 }
 
 // ==================== COLLECT ====================
-export function calculateCollect(player: {
-  operatives: number;
-}): { amount: number; cost: number } {
+export function calculateCollect(player: { operatives: number }): { amount: number; cost: number } {
   return { amount: 200 * player.operatives, cost: 1 };
 }
 
@@ -123,42 +107,68 @@ export function calculateHire(type: 'operative' | 'soldier'): { min: number; max
   return { min: 1, max: 5, cost: 1 };
 }
 
-// ==================== TURN REGENERATION ====================
-export const MAX_TURNS = 500;
-export const TURNS_PER_REGEN = 5;
+// ==================== TURN REGENERATION (settings-aware) ====================
 export const REGEN_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
-export function calculateTurnRegen(lastMaxCheck: Date, now: Date): number {
+export function calculateTurnRegen(lastMaxCheck: Date, now: Date, regenRate: number): number {
   const elapsed = now.getTime() - lastMaxCheck.getTime();
   const intervals = Math.floor(elapsed / REGEN_INTERVAL_MS);
-  return intervals * TURNS_PER_REGEN;
+  return intervals * regenRate;
 }
 
-// ==================== ATTACK RANGE ====================
-export function isInAttackRange(attackerNW: number, defenderNW: number): boolean {
+// ==================== ATTACK RANGE (settings-aware) ====================
+export function isInAttackRange(
+  attackerNW: number,
+  defenderNW: number,
+  rangeAbove: number,
+  rangeBelow: number
+): boolean {
   if (attackerNW <= 0 || defenderNW <= 0) return false;
-  const minRange = attackerNW * 0.5;
-  const maxRange = attackerNW * 4;
+  if (rangeAbove === 0 || rangeBelow === 0) return true; // OFF = can attack anyone
+  const minRange = attackerNW * (1 / rangeAbove);
+  const maxRange = attackerNW * rangeBelow;
   return defenderNW >= minRange && defenderNW <= maxRange;
 }
 
-// ==================== MAXING CHECK ====================
-export const MAXING_PERCENT = 0.10; // 10% of networth per hour
-
-export function isMaxed(recentAttacks: { cashStolen: number; createdAt: Date }[], defenderNW: number, now: Date): boolean {
+// ==================== MAXING CHECK (settings-aware) ====================
+export function isMaxed(
+  recentAttacks: { cashStolen: number; createdAt: Date }[],
+  defenderNW: number,
+  now: Date,
+  maxingPercent: number
+): boolean {
   if (defenderNW <= 0) return false;
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
   const recentTotal = recentAttacks
     .filter(a => new Date(a.createdAt) >= oneHourAgo)
     .reduce((sum, a) => sum + a.cashStolen, 0);
-  return recentTotal >= defenderNW * MAXING_PERCENT;
+  return recentTotal >= defenderNW * (maxingPercent / 100);
 }
 
-// ==================== BANK ====================
-export const MAX_BANK_PERCENT = 0.75;
-
-export function calculateMaxDeposit(cash: number, bank: number): number {
+// ==================== BANK (settings-aware) ====================
+export function calculateMaxDeposit(cash: number, bank: number, bankPercent: number): number {
   const totalCash = cash + bank;
-  const maxBankable = Math.floor(totalCash * MAX_BANK_PERCENT);
+  const maxBankable = Math.floor(totalCash * (bankPercent / 100));
   return Math.max(0, maxBankable - bank);
 }
+
+// ==================== CREDIT SYSTEM ====================
+export function calculateReservesFromCredits(credits: number, turnsPerCredit: number): number {
+  return Math.floor(credits / turnsPerCredit) * turnsPerCredit;
+}
+
+export function calculateTurnsFromReserves(reserves: number, maxTurns: number, currentTurns: number): number {
+  const canRedeem = Math.max(0, maxTurns - currentTurns);
+  return Math.min(reserves, canRedeem);
+}
+
+// ==================== DEFAULT CONSTANTS (fallback) ====================
+export const DEFAULT_MAX_TURNS = 500;
+export const DEFAULT_TURNS_PER_REGEN = 5;
+export const DEFAULT_STARTING_TURNS = 100;
+export const DEFAULT_STARTING_CASH = 5000;
+export const DEFAULT_BANK_PERCENT = 75;
+export const DEFAULT_MAXING_PERCENT = 10;
+export const DEFAULT_RANGE_ABOVE = 4;
+export const DEFAULT_RANGE_BELOW = 0.5;
+export const PROTECTION_HOURS = 24;
