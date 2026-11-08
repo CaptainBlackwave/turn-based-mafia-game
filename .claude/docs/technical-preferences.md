@@ -10,54 +10,56 @@
 
 ## Engine & Language
 
-- **Engine**: [TO BE CONFIGURED — run /setup-engine]
-- **Language**: [TO BE CONFIGURED]
-- **Rendering**: [TO BE CONFIGURED]
-- **Physics**: [TO BE CONFIGURED]
+- **Engine**: Web (TypeScript + Vite). Not a template-supported engine, so see CLAUDE.md
+- **Language**: TypeScript 5.8 (strict)
+- **Rendering**: DOM + CSS, Web Animations API
+- **Physics**: None
 
 ## Input & Platform
 
 <!-- Written by /setup-engine. Read by /ux-design, /ux-review, /test-setup, /team-ui, and /dev-story -->
 <!-- to scope interaction specs, test helpers, and implementation to the correct input methods. -->
 
-- **Target Platforms**: [TO BE CONFIGURED — e.g., PC, Console, Mobile, Web]
-- **Input Methods**: [TO BE CONFIGURED — e.g., Keyboard/Mouse, Gamepad, Touch, Mixed]
-- **Primary Input**: [TO BE CONFIGURED — the dominant input for this game]
-- **Gamepad Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Touch Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Platform Notes**: [TO BE CONFIGURED — any platform-specific UX constraints]
+- **Target Platforms**: Web (mobile browsers first, desktop browsers)
+- **Input Methods**: Touch, Mouse, Keyboard
+- **Primary Input**: Touch (tap a jar, tap a target)
+- **Gamepad Support**: None (keyboard: 1–9/0 pick jars, Z undo, R restart, H hint, Esc deselect)
+- **Touch Support**: Full
+- **Platform Notes**: Must fit a 390×664 viewport with no scrolling and respect safe-area insets
 
 ## Naming Conventions
 
-- **Classes**: [TO BE CONFIGURED]
-- **Variables**: [TO BE CONFIGURED]
-- **Signals/Events**: [TO BE CONFIGURED]
-- **Files**: [TO BE CONFIGURED]
-- **Scenes/Prefabs**: [TO BE CONFIGURED]
-- **Constants**: [TO BE CONFIGURED]
+- **Classes**: PascalCase
+- **Variables**: camelCase
+- **Signals/Events**: `SessionEvent` discriminated union, `type` in camelCase
+- **Files**: kebab-case `.ts`
+- **Scenes/Prefabs**: N/A
+- **Constants**: UPPER_SNAKE_CASE
 
 ## Performance Budgets
 
-- **Target Framerate**: [TO BE CONFIGURED]
-- **Frame Budget**: [TO BE CONFIGURED]
-- **Draw Calls**: [TO BE CONFIGURED]
-- **Memory Ceiling**: [TO BE CONFIGURED]
+- **Target Framerate**: 60 fps during pour animations
+- **Frame Budget**: 16.6 ms. Level generation runs on level start, outside animation (worst seen: 443 ms over 2,000 levels)
+- **Draw Calls**: N/A (DOM)
+- **Memory Ceiling**: 50 MB JS heap
 
 ## Testing
 
-- **Framework**: [TO BE CONFIGURED]
-- **Minimum Coverage**: [TO BE CONFIGURED]
+- **Framework**: Vitest
+- **Minimum Coverage**: every rule in `src/core/` has a unit test
 - **Required Tests**: Balance formulas, gameplay systems, networking (if applicable)
 
 ## Forbidden Patterns
 
 <!-- Add patterns that should never appear in this project's codebase -->
-- [None configured yet — add as architectural decisions are made]
+- DOM, `window` or storage access inside `src/core/`
+- Gameplay numbers hardcoded outside `src/config/game-config.json`
+- Any code, level data, art, audio or names taken from another game
 
 ## Allowed Libraries / Addons
 
 <!-- Add approved third-party dependencies here -->
-- [None configured yet — add as dependencies are approved]
+- Dev only: typescript, vite, vitest. No runtime dependencies.
 
 ## Architecture Decisions Log
 
@@ -70,12 +72,12 @@
 <!-- Read by /code-review, /architecture-decision, /architecture-review, and team skills -->
 <!-- to know which specialist to spawn for engine-specific validation. -->
 
-- **Primary**: [TO BE CONFIGURED — run /setup-engine]
-- **Language/Code Specialist**: [TO BE CONFIGURED]
-- **Shader Specialist**: [TO BE CONFIGURED]
-- **UI Specialist**: [TO BE CONFIGURED]
-- **Additional Specialists**: [TO BE CONFIGURED]
-- **Routing Notes**: [TO BE CONFIGURED]
+- **Primary**: gameplay-programmer (no engine specialist exists for the web stack)
+- **Language/Code Specialist**: gameplay-programmer
+- **Shader Specialist**: technical-artist (CSS effects)
+- **UI Specialist**: ui-programmer
+- **Additional Specialists**: level-designer (curve), accessibility-specialist
+- **Routing Notes**: `src/core/**` goes to gameplay-programmer, `src/ui/**` to ui-programmer, and `src/config/**` to level-designer
 
 ### File Extension Routing
 
@@ -84,9 +86,9 @@
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (primary language) | [TO BE CONFIGURED] |
-| Shader / material files | [TO BE CONFIGURED] |
-| UI / screen files | [TO BE CONFIGURED] |
-| Scene / prefab / level files | [TO BE CONFIGURED] |
-| Native extension / plugin files | [TO BE CONFIGURED] |
+| Game code (primary language) | gameplay-programmer |
+| Shader / material files | technical-artist |
+| UI / screen files | ui-programmer |
+| Scene / prefab / level files | level-designer |
+| Native extension / plugin files | N/A |
 | General architecture review | Primary |

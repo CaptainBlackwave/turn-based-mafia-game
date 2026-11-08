@@ -5,14 +5,24 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
+- **Game**: Strata, a seaside sand-sort puzzle (`design/game-brief.md`)
+- **Engine**: Web: TypeScript 5.8, DOM/CSS rendering, Vite 6 (not one of the template's
+  Godot/Unity/Unreal engines, so `engine.name` stays unset and the code root resolves to `src/`)
+- **Language**: TypeScript (strict)
+- **Tests**: Vitest 3, in `tests/unit/` (`npm test`). Visual evidence is Playwright screenshots in `production/qa/evidence/`
 - **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **Build System**: `npm run build` → `dist/` (static files, so any web host works)
+- **Asset Pipeline**: none. All art is CSS/SVG in `src/ui/`, and tuning is in `src/config/game-config.json`
 
-> **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
-> dedicated sub-specialists. Use the set matching your engine.
+> **Note**: Engine-specialist agents for Godot/Unity/Unreal do not apply here. Use
+> `gameplay-programmer` for `src/core/`, `ui-programmer` for `src/ui/`, and
+> `level-designer` / `systems-designer` for `src/config/game-config.json`.
+
+## Reverse-engineering reference
+
+`design/reverse-engineering/magic-sort-teardown.md` documents the genre rules Strata is
+built against. It is a behavioural teardown. **Never add code, levels, art, audio, names
+or characters taken from another game.**
 
 ## Project Structure
 
@@ -26,7 +36,7 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
      session. It defaults to Godot (the template's example engine); skills that
      need the pinned version read docs/engine-reference/<engine>/VERSION.md on
      demand regardless of this import. -->
-@docs/engine-reference/godot/VERSION.md
+@docs/engine-reference/web/VERSION.md
 
 
 ## Technical Preferences
